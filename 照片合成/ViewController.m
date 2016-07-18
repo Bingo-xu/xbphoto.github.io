@@ -137,21 +137,22 @@
     CGFloat height = panView.frame.size.height;
     NSLog(@"拖移，慢速移动");
     CGPoint translation = [recognizer translationInView:self.showImageView];
-    CGPoint newcenter = CGPointMake(recognizer.view.center.x + translation.x, recognizer.view.center.y + translation.y);;
-    if (newcenter.x >= _imageWidth - width/2) {
-        newcenter.x = _imageWidth - width/2;
-    }
-    if (newcenter.x <= width/2) {
-        newcenter.x = width/2;
-    }
-    if (newcenter.y >= _imageHeight - height/2) {
-        newcenter.y = _imageHeight - height/2;
-    }
-    if (newcenter.y <= height/2) {
-        newcenter.y = height/2;
-    }
+    CGPoint newcenter = CGPointMake(recognizer.view.center.x + translation.x, recognizer.view.center.y + translation.y);
+    //限制imageview在窗口范围内，图片尺寸不一所以屏蔽掉
+//    if (newcenter.x >= _imageWidth - width/2) {
+//        newcenter.x = _imageWidth - width/2;
+//    }
+//    if (newcenter.x <= width/2) {
+//        newcenter.x = width/2;
+//    }
+//    if (newcenter.y >= _imageHeight - height/2) {
+//        newcenter.y = _imageHeight - height/2;
+//    }
+//    if (newcenter.y <= height/2) {
+//        newcenter.y = height/2;
+//    }
     recognizer.view.center = newcenter;
-    panView.frame = recognizer.view.frame;
+//    panView.frame = recognizer.view.frame;
     [recognizer setTranslation:CGPointZero inView:self.showImageView];
     
 }
