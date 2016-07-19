@@ -133,12 +133,12 @@
 {
     _isMove = YES;
     UIView * panView = recognizer.view;
-    CGFloat width = panView.frame.size.width;
-    CGFloat height = panView.frame.size.height;
+//    CGFloat width = panView.frame.size.width;
+//    CGFloat height = panView.frame.size.height;
     NSLog(@"拖移，慢速移动");
     CGPoint translation = [recognizer translationInView:self.showImageView];
     CGPoint newcenter = CGPointMake(recognizer.view.center.x + translation.x, recognizer.view.center.y + translation.y);
-    //限制imageview在窗口范围内，图片尺寸不一所以屏蔽掉
+    //限制imageview在窗口范围内，也可以屏蔽
 //    if (newcenter.x >= _imageWidth - width/2) {
 //        newcenter.x = _imageWidth - width/2;
 //    }
@@ -152,7 +152,7 @@
 //        newcenter.y = height/2;
 //    }
     recognizer.view.center = newcenter;
-//    panView.frame = recognizer.view.frame;
+    panView.frame = recognizer.view.frame;
     [recognizer setTranslation:CGPointZero inView:self.showImageView];
     
 }
@@ -220,11 +220,14 @@
                 if (self.showImageView.subviews.count>3*i+j) {
                     imageView = self.showImageView.subviews[3*i+j];
                 }
-               
+                //初步安放位置
+                CGRect frame = CGRectMake(j*((_imageWidth-10)/3+5), i*((_imageHeight-10)/3+5), (_imageWidth-10)/3, (_imageHeight-10)/3);
+                //真实图片位置
+                CGRect realFrame = [self changeImageRealLocationWith:self.imagesArr[i*3+j] frame:frame];
+                
                 if (!imageView) {
                     imageView = [UIImageView new];
-                    CGRect frame = CGRectMake(j*((_imageWidth-10)/3+5), i*((_imageHeight-10)/3+5), (_imageWidth-10)/3, (_imageHeight-10)/3);
-                    imageView.frame = frame;
+                    imageView.frame = realFrame;
                     //拖移手势
                     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(buttonHandlePan:)];
                     [imageView addGestureRecognizer:panGestureRecognizer];
@@ -237,16 +240,15 @@
                     UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGesture:)];
                     [imageView addGestureRecognizer:tap];
                     
-                    imageView.contentMode = UIViewContentModeScaleAspectFit;
+//                    imageView.contentMode = UIViewContentModeScaleAspectFit;
                
-                    [self.pointArr addObject:NSStringFromCGRect(frame)];
+                    [self.pointArr addObject:NSStringFromCGRect(realFrame)];
                     [self.showImageView addSubview:imageView];
                    
                 }
-//                UIImage * result = [self imageWithImageSimple:self.imagesArr[i*3+j] scaledToSize:CGSizeMake((_imageWidth-10)/3, (_imageHeight-10)/3)];
-//                [self.imagesArr replaceObjectAtIndex:i*3+j withObject:result];
-//                imageView.image = result;
+                
                 imageView.image = self.imagesArr[i*3+j];
+                
             }
         }
 
@@ -262,11 +264,8 @@
     [mainImg drawInRect:mainFrame];//根据新的尺寸画出传过来的图片
     int i = 0;
     for (UIImage *img in imgArray) {
-        CGSize size = CGRectFromString(self.pointArr[i]).size;
-        CGPoint origin = CGRectFromString(self.pointArr[i]).origin;
-        CGPoint center = CGPointMake(origin.x+size.width/2, origin.y+size.height/2);
-        CGRect realRect = CGRectMake(origin.x, center.y - (size.width/img.size.width*img.size.height)/2, size.width, size.width/img.size.width*img.size.height);
-        [img drawInRect:realRect];
+        
+        [img drawInRect:CGRectFromString(self.pointArr[i])];
         i++;
     }
 
@@ -277,13 +276,23 @@
         return nil;
     }
     else {
-
         //存入相册
         UIImageWriteToSavedPhotosAlbum(resultImage, self, nil, nil);
         return resultImage;
     }
 }
 
+
+//将图片frame改为真实比例frame
+-(CGRect)changeImageRealLocationWith:(UIImage *)image frame:(CGRect )frame{
+    
+    CGSize size = frame.size;
+    CGPoint origin = frame.origin;
+    CGPoint center = CGPointMake(origin.x+size.width/2, origin.y+size.height/2);
+    CGRect realRect = CGRectMake(origin.x, center.y - (size.width/image.size.width*image.size.height)/2, size.width, size.width/image.size.width*image.size.height);
+    
+    return realRect;
+}
 
 
 #pragma mark - 初始化相关
